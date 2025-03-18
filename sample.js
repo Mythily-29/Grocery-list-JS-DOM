@@ -3,9 +3,10 @@ let errorMessage = document.querySelector('.alert');
 let listAppendingDiv = document.querySelector('.grocery-list');
 let submit = document.querySelector('.submit-btn');
 let check = true;
-let ele;
 let arr =JSON.parse(localStorage.getItem('groceryitems'))|| [];
 let obj = {};
+let editId;
+let editTarget;
 
 window.onload=()=>{
     arr.forEach(x=>{
@@ -25,21 +26,20 @@ submit.addEventListener('click',(e)=>{
     }
 
     if(check==false){
-        let val=ele.textContent;
-        ele.textContent=inputName.value
         arr.forEach(x=>{
-            if(x.productName == val){
-                x.productName=ele.textContent
+            if(x.productId == editId){
+                x.productName=inputName.value
             }
         })
+        editTarget.textContent=inputName.value
         localStorage.setItem('groceryitems',JSON.stringify(arr))
         inputName.value=""
         check=true; submit.textContent='submit'
         return
     }
-
     obj={productId:Math.random(),productName:inputName.value}
     arr.push(obj)
+    console.log(arr)
     localStorage.setItem('groceryitems',JSON.stringify(arr))
     appendingValues(obj.productName)
     inputName.value=""
@@ -55,23 +55,33 @@ function appendingValues(itemname){
 }
 
 listAppendingDiv.addEventListener('click',(e)=>{
-    if(e.target.classList.contains('fa-pen-to-square')){
-        ele=e.target.parentElement.firstElementChild;
-        inputName.value=ele.textContent
+    if(e.target.classList.contains('fa-pen-to-square')){ 
+        inputName.value=e.target.parentElement.firstElementChild.textContent
+        arr.forEach(x=>{
+            if(x.productName==e.target.parentElement.firstElementChild.textContent){
+                editId=x.productId                
+            }
+        })
+        editTarget=e.target.parentElement.firstElementChild
         submit.textContent="edit";
         check=false
     }
     else if(e.target.classList.contains('fa-trash')){
-       arr=arr.filter((x)=>{
-        return x.productName != e.target.parentElement.firstElementChild.textContent
+        let deleteid;
+       arr.forEach((x)=>{
+        if(x.productName == e.target.parentElement.firstElementChild.textContent){
+            deleteid=x.productId
+        }
        })
+       arr= arr.filter(n=>{return n.productId!=deleteid})
        e.target.parentElement.remove();
        errorMessage.className="alert-danger"; errorMessage.textContent="Item removed successfully";
     }
     localStorage.setItem('groceryitems',JSON.stringify(arr))
 })
 
-ele='';
+editId="";
+editTarget="";
 
 document.querySelector('.clear-btn').addEventListener('click',()=>{
     listAppendingDiv.remove();
